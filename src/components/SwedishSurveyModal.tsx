@@ -36,10 +36,10 @@ const DEADLINE_OPTIONS = [
 ];
 
 const STEPS = [
-  { id: "goal", title: "Why learn Swedish?", mascot: "Varför vill du lära dig svenska? 🇸🇪" },
-  { id: "currentLevel", title: "Your current level?", mascot: "Hur bra svenska kan du redan?" },
-  { id: "targetLevel", title: "Where do you want to reach?", mascot: "Vad är ditt mål?" },
-  { id: "deadline", title: "Your timeline?", mascot: "Hur lång tid har du på dig? ⏰" },
+  { id: "goal", title: "Why learn Swedish?", mascot: "What's your main motivation for learning Swedish? 🇸🇪" },
+  { id: "currentLevel", title: "Your current level?", mascot: "How much Swedish do you already know?" },
+  { id: "targetLevel", title: "Where do you want to reach?", mascot: "What level do you want to achieve?" },
+  { id: "deadline", title: "Your timeline?", mascot: "How much time do you have? ⏰" },
 ];
 
 interface SwedishSurveyModalProps {

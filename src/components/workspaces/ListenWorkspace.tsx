@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { completeTask } from "@/app/actions/task";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Youtube } from "lucide-react";
 import TaskCompletionCelebration from "@/components/TaskCompletionCelebration";
 import { useRouter } from "next/navigation";
 
@@ -10,6 +10,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
   const [textAnswer, setTextAnswer] = useState("");
   const [isPending, startTransition] = useTransition();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [videoTitle, setVideoTitle] = useState<string | null>(null);
   const router = useRouter();
 
   // Expected format from AI: "VIDEO_ID | Instruction"
@@ -28,6 +29,22 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
       };
     }
   }, [task.content]);
+
+  // Fetch real YouTube video title via noembed
+  useEffect(() => {
+    if (!parsedData.videoId) return;
+    const url = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${parsedData.videoId}`;
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.title) {
+          setVideoTitle(data.title);
+        }
+      })
+      .catch(() => {
+        // Silently fail – title will just not show
+      });
+  }, [parsedData.videoId]);
 
   const handleComplete = () => {
     if (!textAnswer.trim()) return;
@@ -53,6 +70,16 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
       )}
 
       <div className="max-w-3xl mx-auto py-4 md:py-8 pb-12 px-4 md:px-0">
+        {/* Video title */}
+        <div className="mb-4 flex items-center gap-2">
+          <Youtube className="w-5 h-5 text-red-500 shrink-0" />
+          {videoTitle ? (
+            <h2 className="font-bold text-lg md:text-xl text-zinc-900 leading-tight">{videoTitle}</h2>
+          ) : (
+            <div className="h-6 w-64 bg-zinc-200 rounded-lg animate-pulse" />
+          )}
+        </div>
+
         {/* YouTube Video Section */}
         <div className="bg-zinc-950 rounded-3xl p-2 mb-6 shadow-xl overflow-hidden shrink-0">
           <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black relative">
@@ -60,7 +87,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
               width="100%"
               height="100%"
               src={`https://www.youtube-nocookie.com/embed/${parsedData.videoId}?rel=0`}
-              title="YouTube video player"
+              title={videoTitle || "YouTube video player"}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 border-0"
