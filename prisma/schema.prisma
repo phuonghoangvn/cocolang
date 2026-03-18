@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  UX_ENGLISH
+  SWEDISH
+}
+
+enum Level {
+  A1
+  A2
+  B1
+  B2
+  C1
+}
+
+enum TaskType {
+  LISTEN
+  SPEAK
+  READ
+  WRITE
+  QUIZ
+}
+
+model User {
+  id                String         @id @default(cuid())
+  email             String         @unique
+  password          String         
+  name              String?
+  avatar            String?        // emoji avatar
+  isBot             Boolean        @default(false)
+  totalXp           Int            @default(0)
+  currentStreak     Int            @default(0)
+  lastCompletedDate DateTime?
+
+  // Survey / onboarding
+  surveyCompleted   Boolean        @default(false)
+  nativeLanguage    String?        // e.g. "Vietnamese"
+  learningGoal      String?        // e.g. "Work abroad", "Travel", etc.
+  currentLevel      String?        // Self-assessed level
+  dailyGoalMinutes  Int?           @default(15)
+  activeTrack       Category       @default(SWEDISH)
+
+  // Email notifications
+  emailReminders    Boolean        @default(true)
+
+  progress          UserProgress[]
+}
+
+model Task {
+  id          String         @id @default(cuid())
+  category    Category
+  level       Level
+  day         Int            
+  type        TaskType
+  title       String
+  content     String         
+  reference   String?        
+  xpReward    Int            @default(100)
+  progress    UserProgress[]
+}
+
+model UserProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  taskId        String
+  userContent   String?  
+  isCompleted   Boolean  @default(false)
+  completedAt   DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task          Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, taskId]) 
+}
