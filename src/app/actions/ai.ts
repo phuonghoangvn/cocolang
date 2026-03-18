@@ -215,7 +215,7 @@ export async function generateRoadmapForEnrollment(params: {
   const effectiveLevels: Level[] =
     category === "UX_ENGLISH" ? (["B1", "B2", "C1"] as Level[]) : levelsToGenerate.length > 0 ? levelsToGenerate : ALL_LEVELS;
 
-  const TASK_TYPES: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE", "QUIZ"];
+  const TASK_TYPES: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE"];
   const tasksPerLevel = calcTasksPerLevel(goalDeadlineDays, effectiveLevels.length);
 
   console.log(
@@ -319,7 +319,7 @@ export async function autoGenerateNextRoadmapTask() {
     orderBy: { day: "desc" },
   });
 
-  const CYCLE: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE", "QUIZ"];
+  const CYCLE: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE"];
 
   let category: Category = "UX_ENGLISH";
   let level: Level = "B1";

@@ -69,7 +69,7 @@ export default function DuolingoRoadmap({
 
   // Pad each level with virtual locked tasks to visually represent the 200-300 hours required per level
   const TARGET_NODES_PER_LEVEL = 40; // 40 nodes per level to make it look huge
-  const ALL_TYPES = ["SPEAK", "LISTEN", "READ", "WRITE", "QUIZ"];
+  const ALL_TYPES = ["SPEAK", "LISTEN", "READ", "WRITE"];
   
   for (const level of ["A1", "A2", "B1", "B2", "C1"]) {
     if (grouped[level]?.length > 0) {
@@ -128,6 +128,7 @@ export default function DuolingoRoadmap({
   };
 
   const activeConfig = COURSE_CONFIG.find((c) => c.value === activeTrack) || COURSE_CONFIG[0];
+  const allOrderedTasks = LEVEL_ORDER.flatMap(level => grouped[level] || []);
 
   return (
     <div className="flex flex-col">
@@ -249,10 +250,10 @@ export default function DuolingoRoadmap({
                     return (
                       <div key={rowIdx} className={`flex gap-4 justify-center ${isEvenRow ? "" : "flex-row-reverse"}`}>
                         {orderedRow.map((task: any, colIdx: number) => {
-                          const globalIdx = rowIdx * NODES_PER_ROW + (isEvenRow ? colIdx : rowTasks.length - 1 - colIdx);
-                          const prevTask = levelTasks[globalIdx - 1];
+                          const globalIdx = allOrderedTasks.findIndex(t => t.id === task.id);
+                          const globalPrevTask = globalIdx > 0 ? allOrderedTasks[globalIdx - 1] : null;
                           const isCompleted = completedIds.includes(task.id);
-                          const isActive = !isCompleted && (!prevTask || completedIds.includes(prevTask.id));
+                          const isActive = !isCompleted && (!globalPrevTask || completedIds.includes(globalPrevTask.id));
                           const cfg = TASK_TYPE_CONFIG[task.type as keyof typeof TASK_TYPE_CONFIG] || TASK_TYPE_CONFIG.READ;
                           const TypeIcon = cfg.icon;
 
@@ -306,6 +307,11 @@ export default function DuolingoRoadmap({
                               }`}>
                                 {task.title}
                               </span>
+                              {!isCompleted && (
+                                <span className={`text-[9px] font-black tracking-wide ${isActive ? "text-amber-500" : "text-zinc-300"}`}>
+                                  {task.xpReward || 100} XP
+                                </span>
+                              )}
                             </div>
                           );
                         })}
