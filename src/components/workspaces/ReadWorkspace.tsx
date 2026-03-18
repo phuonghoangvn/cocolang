@@ -6,6 +6,41 @@ import { Copy, Check, Loader2 } from "lucide-react";
 import TaskCompletionCelebration from "@/components/TaskCompletionCelebration";
 import { useRouter } from "next/navigation";
 
+function FormattedText({ text }: { text: string }) {
+  const paragraphs = text.split(/\n+/);
+  return (
+    <div className="space-y-3 text-left">
+      {paragraphs.map((para, i) => {
+        // match **bold** with (.*?)
+        // and optionally links [text](url)
+        // A full Markdown parser isn't used here to stay lightweight, but basic bold wrapping helps.
+        const parts = para.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
+        return (
+          <p key={i}>
+            {parts.map((part, j) => {
+              if (part.startsWith("**") && part.endsWith("**")) {
+                return <strong key={j} className="text-zinc-950 font-black">{part.slice(2, -2)}</strong>;
+              }
+              if (part.startsWith("[") && part.includes("](")) {
+                const labelMatch = part.match(/\[(.*?)\]/);
+                const urlMatch = part.match(/\((.*?)\)/);
+                const label = labelMatch ? labelMatch[1] : part;
+                const url = urlMatch ? urlMatch[1] : "#";
+                return <a key={j} href={url} target="_blank" rel="noopener noreferrer" className="text-sky-600 underline hover:text-sky-800 break-all">{label}</a>;
+              }
+              // detect raw urls natively
+              if (part.startsWith("http")) {
+                return <a key={j} href={part.split(" ")[0]} target="_blank" rel="noopener noreferrer" className="text-sky-600 underline hover:text-sky-800 break-all">{part.split(" ")[0]}</a>;
+              }
+              return part;
+            })}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ReadWorkspace({ task, isCompleted }: { task: any; isCompleted: boolean }) {
   const [userContent, setUserContent] = useState("");
   const [copied, setCopied] = useState(false);
@@ -41,7 +76,7 @@ export default function ReadWorkspace({ task, isCompleted }: { task: any; isComp
         />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 flex-col py-6 px-4 md:px-0">
         <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6 relative flex flex-col">
           <button
             onClick={handleCopy}
@@ -51,11 +86,11 @@ export default function ReadWorkspace({ task, isCompleted }: { task: any; isComp
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-zinc-500" />}
           </button>
           <h3 className="font-semibold text-zinc-900 mb-4">Source Text</h3>
-          <p className="text-zinc-700 leading-relaxed overflow-y-auto flex-1 whitespace-pre-wrap">
-            {task.content}
-          </p>
+          <div className="text-zinc-700 leading-relaxed overflow-y-auto flex-1 whitespace-pre-wrap">
+            <FormattedText text={task.content} />
+          </div>
         </div>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-[350px] lg:min-h-0">
           <h3 className="font-semibold text-zinc-900 mb-4">Your Translation / Notes</h3>
           <textarea
             value={userContent}

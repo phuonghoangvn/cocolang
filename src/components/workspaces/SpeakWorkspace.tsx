@@ -5,6 +5,28 @@ import { completeTask } from "@/app/actions/task";
 import { Mic, Square, Loader2, CheckCircle, ArrowRight } from "lucide-react";
 import TaskCompletionCelebration from "@/components/TaskCompletionCelebration";
 import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+function FormattedText({ text }: { text: string }) {
+  const paragraphs = text.split(/\n+/);
+  return (
+    <div className="space-y-3 text-left">
+      {paragraphs.map((para, i) => {
+        const parts = para.split(/(\*\*.*?\*\*)/g);
+        return (
+          <p key={i}>
+            {parts.map((part, j) => {
+              if (part.startsWith("**") && part.endsWith("**")) {
+                return <strong key={j} className="text-zinc-950 font-black">{part.slice(2, -2)}</strong>;
+              }
+              return part;
+            })}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 const PHASES = [
   { time: 240, label: "Round 1: 4 Minutes", desc: "Speak comprehensively about the topic." },
@@ -20,6 +42,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
   
   const [isPending, startTransition] = useTransition();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showTopic, setShowTopic] = useState(false);
   const router = useRouter();
 
   const isAllFinished = phaseIndex >= PHASES.length;
@@ -81,9 +104,12 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
       )}
 
       <div className="max-w-2xl mx-auto flex flex-col items-center justify-center text-center py-6 md:py-12 px-4 md:px-0">
-        <div className="mb-8">
-          <h2 className="text-2xl font-black text-zinc-900 mb-2">4-3-2 Speaking Method</h2>
-          <p className="text-zinc-500">Master fluency by repeating the same topic with decreasing time constraints.</p>
+        <div className="mb-6">
+          <h2 className="text-2xl font-black text-zinc-900 mb-2">4-3-2 Free Talk</h2>
+          <p className="text-zinc-500 text-sm md:text-base px-2">
+            <strong>How it works:</strong> Speak continuously for 4 minutes. Then, repeat the same topic in 3 minutes.
+            Finally, condense it flawlessly in 2 minutes! You can talk about anything.
+          </p>
         </div>
 
         {/* Phase Indicators */}
@@ -103,8 +129,20 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
           ))}
         </div>
 
-        <div className="bg-white shadow-sm border border-zinc-200 rounded-3xl p-6 mb-10 w-full hover:border-zinc-300 transition-colors">
-          <p className="text-lg font-medium text-zinc-800 leading-relaxed italic">&quot;{task.content}&quot;</p>
+        <div className="w-full mb-8 flex flex-col items-center">
+          <button
+            onClick={() => setShowTopic((s) => !s)}
+            className="flex items-center justify-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 px-5 py-2.5 rounded-full font-bold text-sm transition-colors w-auto"
+          >
+            {showTopic ? "Hide Recommended Topic" : "View Recommended Topic"}
+            {showTopic ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showTopic && (
+            <div className="bg-white shadow-lg shadow-zinc-200/50 border border-zinc-200 rounded-2xl p-6 mt-4 w-full text-zinc-700 text-sm md:text-base leading-relaxed transition-all">
+              <FormattedText text={task.content} />
+            </div>
+          )}
         </div>
 
         {!isAllFinished && (

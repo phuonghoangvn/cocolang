@@ -71,7 +71,7 @@ function buildTaskPrompt(params: {
     : ENGLISH_VIDEOS[Math.floor(Math.random() * ENGLISH_VIDEOS.length)];
 
   const typeInstructions: Record<TaskType, string> = {
-    READ: "Provide an excerpt from a real, recent article, news source, or research paper. Provide the original source/link if possible at the top. For English, focus on UI/UX, technology, startups, studying abroad, or job hunting. For Swedish A1/A2, focus on very easy, common daily topics. Put the Title at the top, followed by a 100-word excerpt, and it should be followed by a comprehension question.",
+    READ: "Use the googleSearch tool to find a REAL, recent web article, news post, or research paper on the requested topic. Quote an exact 100-word excerpt from it and include its actual URL as the source link at the top. Do NOT generate fake text, always search and retrieve a real source. Put the Title at the top, the excerpt, and end with a comprehension question.",
     LISTEN: `You will provide an instruction for a real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Summarize the main points of this video in your own words or transcribe a key section." Do not generate any multiple-choice options.`,
     SPEAK: "Provide a challenging open-ended speaking prompt. The learner will practice the 4-3-2 method (speaking on the exact same topic for 4 mins, then 3 mins, then 2 mins). Describe the scenario clearly.",
     WRITE: "Provide a writing scenario or prompt that requires the learner to write 3–5 sentences in the target language. The scenario should directly relate to their real-world goal.",
@@ -119,6 +119,7 @@ async function callGemini(prompt: string): Promise<{ title: string; content: str
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
         generationConfig: {
           temperature: 0.75,
           responseMimeType: "application/json",
