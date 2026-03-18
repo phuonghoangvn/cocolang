@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { User, Mail, Clock, Target, Globe, Bell, BellOff, Check, Loader2, ArrowLeft } from "lucide-react";
+import { User, Mail, Clock, Target, Globe, Bell, BellOff, Check, Loader2, ArrowLeft, LogOut } from "lucide-react";
 import Link from "next/link";
 
 const AVATARS = ["🐨", "🦊", "🐸", "🦁", "🐻", "🦋", "🐬", "🦄", "🐙", "🐧", "🦜", "🐺"];
@@ -189,6 +189,16 @@ export default function ProfileClient({ user }: ProfileClientProps) {
           "Save Changes"
         )}
       </button>
+
+      {/* Sign out (Visible primarily for Mobile since sidebar is hidden) */}
+      <div className="mt-8 border-t border-zinc-200 pt-8 flex justify-center">
+        <Link
+          href="/api/auth/signout"
+          className="flex items-center gap-2 text-red-500 font-bold hover:bg-red-50 px-6 py-3 rounded-xl transition-colors"
+        >
+          <LogOut className="w-5 h-5" /> Sign Out
+        </Link>
+      </div>
     </div>
   );
 }
