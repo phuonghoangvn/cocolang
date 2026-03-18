@@ -145,7 +145,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
           )}
         </div>
 
-        {!isAllFinished && (
+        {!isAllFinished && !isCompleted && (
           <div className="mb-6 flex flex-col items-center">
             <span className="text-sm font-black text-red-500 uppercase tracking-widest">{currentPhase.label}</span>
             <span className="text-xs text-zinc-500 mt-1">{currentPhase.desc}</span>
@@ -185,7 +185,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
           </button>
         </div>
 
-        {!isAllFinished && (
+        {!isAllFinished && !isCompleted && (
           <div className={`text-4xl font-mono font-bold mb-10 transition-colors ${isRecording ? "text-red-500" : phaseFinished ? "text-emerald-500" : "text-zinc-800"}`}>
             {Math.floor(timeLeft / 60).toString().padStart(2, "0")}:{(timeLeft % 60).toString().padStart(2, "0")}
           </div>

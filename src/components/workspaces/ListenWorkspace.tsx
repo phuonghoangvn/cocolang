@@ -52,7 +52,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
         />
       )}
 
-      <div className="max-w-3xl mx-auto h-full flex flex-col py-4 md:py-8 pb-12 px-4 md:px-0">
+      <div className="max-w-3xl mx-auto py-4 md:py-8 pb-12 px-4 md:px-0">
         {/* YouTube Video Section */}
         <div className="bg-zinc-950 rounded-3xl p-2 mb-6 shadow-xl overflow-hidden shrink-0">
           <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black relative">
@@ -68,7 +68,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="mb-8">
           <h3 className="font-bold text-lg md:text-xl text-zinc-900 mb-2 leading-tight">
             {parsedData.question}
           </h3>
@@ -79,12 +79,12 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
             value={textAnswer}
             onChange={(e) => setTextAnswer(e.target.value)}
             placeholder="Start typing your notes here..."
-            className="flex-1 w-full resize-none p-4 rounded-xl border-2 border-zinc-200 focus:border-zinc-950 focus:ring-0 outline-none transition-colors disabled:opacity-50 disabled:bg-zinc-50 bg-white"
-            style={{ minHeight: "120px" }}
+            className="w-full resize-none p-4 rounded-xl border-2 border-zinc-200 focus:border-zinc-950 focus:ring-0 outline-none transition-colors disabled:opacity-50 disabled:bg-zinc-50 bg-white"
+            style={{ minHeight: "200px" }}
           />
         </div>
 
-        <div className="mt-6 pt-6 border-t border-zinc-200 shrink-0">
+        <div className="mt-2 pt-6 border-t border-zinc-200">
           <button
             onClick={handleComplete}
             disabled={!textAnswer.trim() || isPending || isCompleted}
