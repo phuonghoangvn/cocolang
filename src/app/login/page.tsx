@@ -84,10 +84,10 @@ export default function LoginPage() {
               🦜
             </div>
             <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-200 to-indigo-200">
-              Master Swedish<br />& UX English
+              Learn any language,<br />the fun way! 🎉
             </h2>
             <p className="text-zinc-400 font-medium text-lg leading-relaxed max-w-sm">
-              Level up your career with tailored language paths designed for modern professionals.
+              Explore new languages with bite-sized lessons, fun challenges, and your personal AI companion. Let's go! 🚀
             </p>
           </div>
         </div>
