@@ -7,6 +7,7 @@ import {
   CheckCircle2, Lock, ChevronDown, Zap, Plus, Loader2
 } from "lucide-react";
 import SwedishSurveyModal from "@/components/SwedishSurveyModal";
+import AutoGenerateButton from "@/components/AutoGenerateButton";
 
 const TASK_TYPE_CONFIG = {
   SPEAK: { icon: Mic, label: "Speak", color: "#f43f5e", bg: "#fff1f2", nodeGrad: "from-rose-400 to-pink-500" },
@@ -64,6 +65,26 @@ export default function DuolingoRoadmap({
   for (const t of filtered) {
     if (!grouped[t.level]) grouped[t.level] = [];
     grouped[t.level].push(t);
+  }
+
+  // Pad each level with virtual locked tasks to visually represent the 200-300 hours required per level
+  const TARGET_NODES_PER_LEVEL = 40; // 40 nodes per level to make it look huge
+  const ALL_TYPES = ["SPEAK", "LISTEN", "READ", "WRITE", "QUIZ"];
+  
+  for (const level of ["A1", "A2", "B1", "B2", "C1"]) {
+    if (grouped[level]?.length > 0) {
+      const currentCount = grouped[level].length;
+      if (currentCount < TARGET_NODES_PER_LEVEL) {
+        for (let i = currentCount; i < TARGET_NODES_PER_LEVEL; i++) {
+          grouped[level].push({
+            id: `virtual-${level}-${i}`,
+            type: ALL_TYPES[i % ALL_TYPES.length],
+            title: "Future Milestone",
+            isVirtual: true,
+          });
+        }
+      }
+    }
   }
 
   const NODES_PER_ROW = 4;
@@ -246,15 +267,17 @@ export default function DuolingoRoadmap({
                               )}
 
                               <Link
-                                href={isCompleted || isActive ? `/dashboard/task/${task.id}` : "#"}
+                                href={!task.isVirtual && (isCompleted || isActive) ? `/dashboard/task/${task.id}` : "#"}
                                 className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none ${
                                   isCompleted
                                     ? `bg-gradient-to-br ${cfg.nodeGrad} shadow-lg opacity-80`
                                     : isActive
-                                    ? `bg-gradient-to-br ${cfg.nodeGrad} shadow-xl shadow-current/30 scale-110 ring-4 ring-white animate-pulse`
+                                    ? task.isVirtual
+                                      ? "bg-zinc-200 cursor-not-allowed scale-100 ring-2 ring-zinc-300"
+                                      : `bg-gradient-to-br ${cfg.nodeGrad} shadow-xl shadow-current/30 scale-110 ring-4 ring-white animate-pulse`
                                     : "bg-zinc-200 cursor-not-allowed"
                                 }`}
-                                onClick={!isCompleted && !isActive ? (e) => e.preventDefault() : undefined}
+                                onClick={(!isCompleted && !isActive) || task.isVirtual ? (e) => { e.preventDefault(); if (task.isVirtual && isActive) alert("Please use the 'Unlock Next Task' button below to generate this module with AI."); } : undefined}
                               >
                                 {isCompleted ? (
                                   <CheckCircle2 className="w-7 h-7 text-white fill-white/30" />
@@ -310,7 +333,8 @@ export default function DuolingoRoadmap({
 
         {/* Mascot at the bottom */}
         <div className="flex flex-col items-center py-8 gap-3 text-zinc-400 text-sm">
-          <div className="text-5xl">{userAvatar || "🦜"}</div>
+          <AutoGenerateButton />
+          <div className="text-5xl mt-8">{userAvatar || "🦜"}</div>
           <p className="font-semibold text-zinc-500">You&apos;re doing amazing!</p>
         </div>
       </div>

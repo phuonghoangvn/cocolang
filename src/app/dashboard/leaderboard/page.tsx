@@ -9,21 +9,15 @@ export default async function LeaderboardPage() {
 
   const session = await getServerSession(authOptions);
 
-  // Fetch real users and bots separately, then merge with real users prioritized
+  // Fetch real users only
   const realUsers = await prisma.user.findMany({
     where: { isBot: false },
     orderBy: { totalXp: "desc" },
     select: { id: true, name: true, totalXp: true, currentStreak: true, isBot: true },
   });
 
-  const bots = await prisma.user.findMany({
-    where: { isBot: true },
-    orderBy: { totalXp: "desc" },
-    select: { id: true, name: true, totalXp: true, currentStreak: true, isBot: true },
-  });
-
-  // Real users at top, then bots — each group sorted by XP
-  const allUsers = [...realUsers, ...bots].slice(0, 12);
+  // Only real users
+  const allUsers = [...realUsers].slice(0, 12);
 
   const currentUserId = session?.user?.id;
 
@@ -38,7 +32,7 @@ export default async function LeaderboardPage() {
           Who&apos;s On Top?
         </h1>
         <p className="text-zinc-500 mt-1 text-sm">
-          Real learners ranked first · Bots fill the competition 🤖
+          Top most dedicated real learners 📈
         </p>
       </div>
 
@@ -78,9 +72,6 @@ export default async function LeaderboardPage() {
       <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl overflow-hidden flex-1">
         <div className="bg-zinc-50 border-b border-zinc-200 px-5 py-3 flex items-center gap-2">
           <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Rankings</span>
-          <span className="ml-auto text-[10px] text-zinc-400 bg-sky-50 border border-sky-100 text-sky-600 font-bold px-2 py-0.5 rounded-full">
-            👤 Real users ranked first
-          </span>
         </div>
         <div className="divide-y divide-zinc-100">
           {/* Header */}

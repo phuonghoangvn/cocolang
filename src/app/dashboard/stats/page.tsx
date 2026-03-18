@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { Flame, Zap, CheckCircle2, Trophy, Mic, Headphones, BookOpen, PenTool, HelpCircle } from "lucide-react";
+import { Flame, Zap, CheckCircle2, Trophy, Mic, Headphones, BookOpen, PenTool, HelpCircle, Clock } from "lucide-react";
 import ProgressCharts from "@/components/ProgressCharts";
 
 const TASK_TYPE_CONFIG = {
@@ -74,6 +74,11 @@ export default async function StatsPage() {
   // Longest streak est. (simplified)
   const totalDone = allProgress.length;
 
+  const hoursSpent = Math.max(0, (totalDone * 15) / 60);
+  const targetHours = 200; // Average for B1->B2, B2->C1
+  const hoursRemaining = Math.max(0, targetHours - hoursSpent);
+  const completionPercentage = Math.min(100, Math.round((hoursSpent / targetHours) * 100));
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
@@ -111,6 +116,42 @@ export default async function StatsPage() {
           label="Best Streak"
           unit="days"
         />
+      </div>
+
+      {/* CEFR Hours Tracker */}
+      <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-sky-500" /> Time Spent Learning
+          </h2>
+          <span className="text-xs font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+            Target: {targetHours} hours
+          </span>
+        </div>
+
+        <div className="relative pt-2">
+          <div className="flex mb-2 items-center justify-between">
+            <div className="text-left">
+              <span className="text-xs font-black inline-block text-emerald-600">
+                {hoursSpent.toFixed(1)} hrs studied
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-semibold inline-block text-zinc-500">
+                {hoursRemaining.toFixed(1)} hrs remaining
+              </span>
+            </div>
+          </div>
+          <div className="overflow-hidden h-3 mb-3 text-xs flex rounded-full bg-zinc-100 ring-1 ring-inset ring-zinc-200">
+            <div
+              style={{ width: `${completionPercentage}%` }}
+              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-1000"
+            />
+          </div>
+          <p className="text-[10px] font-bold text-zinc-400 text-center uppercase tracking-widest">
+            {completionPercentage}% completed to reach the next CEFR level
+          </p>
+        </div>
       </div>
 
       {/* XP Chart + Task breakdown — client component */}
