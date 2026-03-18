@@ -40,8 +40,34 @@ export default async function DashboardLayout({
   // Note: We can't do path check easily in layout, so we handle this softly
 
   return (
-    <div className="flex h-screen bg-zinc-50 flex-col md:flex-row">
-      <aside className="w-full md:w-64 bg-white border-r border-zinc-200 flex flex-col justify-between">
+    <div className="flex h-[100dvh] bg-zinc-50 flex-col md:flex-row overflow-hidden">
+      {/* MOBILE TOP HEADER */}
+      <header className="md:hidden flex items-center justify-between bg-white border-b border-zinc-200 px-4 py-3 shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-violet-600 rounded-lg flex items-center justify-center shadow-sm">
+            <span className="text-white font-black text-sm">🦜</span>
+          </div>
+          <h1 className="font-black text-lg tracking-tight text-zinc-950">
+            Cocolang
+          </h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 text-xs font-bold mt-0.5">
+            <span className="flex items-center gap-1 text-orange-500">
+              <Flame className="w-4 h-4" /> {userStats?.currentStreak || 0}
+            </span>
+            <span className="flex items-center gap-1 text-emerald-500">
+              <Zap className="w-4 h-4" /> {(userStats?.totalXp || 0).toLocaleString()}
+            </span>
+          </div>
+          <Link href="/dashboard/profile" className="w-8 h-8 rounded-full border-2 border-zinc-100 flex items-center justify-center bg-zinc-50 overflow-hidden">
+            <span className="text-xl">{userStats?.avatar || "🦜"}</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* DESKTOP SIDEBAR */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-zinc-200 flex-col justify-between shrink-0 h-full">
         <div>
           {/* Logo */}
           <div className="p-5 border-b border-zinc-100 flex items-center gap-2.5">
@@ -86,7 +112,7 @@ export default async function DashboardLayout({
         <div className="p-4 border-t border-zinc-200">
           <Link
             href="/api/auth/signout"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-zinc-500 hover:text-red-500 hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -94,7 +120,16 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      {/* MAIN CONTENT */}
+      <main className="flex-1 overflow-y-auto pb-16 md:pb-0 relative">{children}</main>
+
+      {/* MOBILE BOTTOM NAV */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-zinc-200 flex items-center justify-around pb-safe pt-2 px-2 z-50">
+        <MobileNavLink href="/dashboard" icon={<BookOpen className="w-6 h-6" />} label="Learn" />
+        <MobileNavLink href="/dashboard/stats" icon={<BarChart2 className="w-6 h-6" />} label="Progress" />
+        <MobileNavLink href="/dashboard/leaderboard" icon={<Trophy className="w-6 h-6" />} label="Rank" />
+        <MobileNavLink href="/dashboard/profile" icon={<UserCircle className="w-6 h-6" />} label="Profile" />
+      </nav>
     </div>
   );
 }
@@ -107,6 +142,18 @@ function NavLink({ href, icon, label }: { href: string; icon: React.ReactNode; l
     >
       <span className="text-zinc-400">{icon}</span>
       {label}
+    </Link>
+  );
+}
+
+function MobileNavLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex flex-col items-center gap-1 p-2 flex-1 text-zinc-500 hover:text-zinc-950"
+    >
+      {icon}
+      <span className="text-[10px] font-bold">{label}</span>
     </Link>
   );
 }

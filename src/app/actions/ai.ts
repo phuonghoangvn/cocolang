@@ -34,6 +34,17 @@ function buildTaskPrompt(params: {
   const targetLang = isSwedish ? "Swedish" : "English";
   const nativeLang = nativeLanguage || "Vietnamese";
 
+  let contextTopic = "general language proficiency";
+  if (isSwedish) {
+    if (level === "A1" || level === "A2") {
+      contextTopic = "very easy, common, daily life topics appropriate for beginners";
+    } else {
+      contextTopic = "Swedish society, work, and general topics";
+    }
+  } else {
+    contextTopic = "working, studying, job hunting, UI/UX, startups, and technology";
+  }
+
   const goalMap: Record<string, string> = {
     work: "securing a job or thriving in a professional work environment abroad",
     travel: "travelling confidently and navigating real-world situations as a tourist or expat",
@@ -42,7 +53,8 @@ function buildTaskPrompt(params: {
     culture: "enjoying movies, books, music, and social media in the target language",
     fun: "enjoying language learning as a fulfilling personal hobby",
   };
-  const goalDescription = learningGoal ? (goalMap[learningGoal] || learningGoal) : "general language proficiency";
+
+  const goalDescription = learningGoal ? (goalMap[learningGoal] || learningGoal) : contextTopic;
 
   const urgencyLevel =
     (deadlineDays ?? 30) <= 7 ? "EXTREME – generate highly targeted, exam-like, high-density content" :
@@ -51,16 +63,16 @@ function buildTaskPrompt(params: {
     (deadlineDays ?? 30) <= 60 ? "MODERATE – balanced content with steady progression" :
     "RELAXED – comfortable, enjoyable content with gradual build-up";
 
-  const ENGLISH_VIDEOS = ["reYcgvTEXBE", "8rDJmX7S5aM", "RJKK8q9b54Q", "9vJRopau0g0", "F0YdOETyOCQ", "iG9CE55wbtY"];
-  const SWEDISH_VIDEOS = ["L9y_eC6FepQ", "pXzB187H5fE", "Xz_Xv3N_tOQ", "yY8pUvG766o", "7Yq3E9g5OEQ"];
+  const ENGLISH_VIDEOS = ["qp0HIF3SfI4", "arj7oStGLkU", "iCvmsMzlF7o", "8KkKuTCFvzI", "iG9CE55wbtY", "9vJRopau0g0"];
+  const SWEDISH_VIDEOS = ["qp0HIF3SfI4", "arj7oStGLkU", "iCvmsMzlF7o", "8KkKuTCFvzI", "iG9CE55wbtY", "9vJRopau0g0"];
   
   const videoId = isSwedish 
     ? SWEDISH_VIDEOS[Math.floor(Math.random() * SWEDISH_VIDEOS.length)] 
     : ENGLISH_VIDEOS[Math.floor(Math.random() * ENGLISH_VIDEOS.length)];
 
   const typeInstructions: Record<TaskType, string> = {
-    READ: "Provide an excerpt from a real, recent article or research paper related to AI, UI/UX, Business, or Technology in the target language. Put the Title at the top, followed by a 100-word excerpt, and end with a comprehension question.",
-    LISTEN: `You will create a quiz for a real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Your question related to technology/business/AI? | Option A | Option B | Option C | Option D | CorrectIndex (0-3)".`,
+    READ: "Provide an excerpt from a real, recent article, news source, or research paper. Provide the original source/link if possible at the top. For English, focus on UI/UX, technology, startups, studying abroad, or job hunting. For Swedish A1/A2, focus on very easy, common daily topics. Put the Title at the top, followed by a 100-word excerpt, and it should be followed by a comprehension question.",
+    LISTEN: `You will provide an instruction for a real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Summarize the main points of this video in your own words or transcribe a key section." Do not generate any multiple-choice options.`,
     SPEAK: "Provide a challenging open-ended speaking prompt. The learner will practice the 4-3-2 method (speaking on the exact same topic for 4 mins, then 3 mins, then 2 mins). Describe the scenario clearly.",
     WRITE: "Provide a writing scenario or prompt that requires the learner to write 3–5 sentences in the target language. The scenario should directly relate to their real-world goal.",
     QUIZ: "Provide a multiple-choice question testing vocabulary or grammar at this CEFR level. Format: \"Question? | Option A | Option B | Option C | Option D | CorrectIndex\" (0-indexed).",
@@ -215,7 +227,7 @@ export async function generateRoadmapForEnrollment(params: {
   const effectiveLevels: Level[] =
     category === "UX_ENGLISH" ? (["B1", "B2", "C1"] as Level[]) : levelsToGenerate.length > 0 ? levelsToGenerate : ALL_LEVELS;
 
-  const TASK_TYPES: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE"];
+  const TASK_TYPES: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
   const tasksPerLevel = calcTasksPerLevel(goalDeadlineDays, effectiveLevels.length);
 
   console.log(
@@ -319,7 +331,7 @@ export async function autoGenerateNextRoadmapTask() {
     orderBy: { day: "desc" },
   });
 
-  const CYCLE: TaskType[] = ["READ", "LISTEN", "SPEAK", "WRITE"];
+  const CYCLE: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
 
   let category: Category = "UX_ENGLISH";
   let level: Level = "B1";

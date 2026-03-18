@@ -80,7 +80,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
         />
       )}
 
-      <div className="max-w-2xl mx-auto h-full flex flex-col items-center justify-center text-center py-12">
+      <div className="max-w-2xl mx-auto flex flex-col items-center justify-center text-center py-6 md:py-12 px-4 md:px-0">
         <div className="mb-8">
           <h2 className="text-2xl font-black text-zinc-900 mb-2">4-3-2 Speaking Method</h2>
           <p className="text-zinc-500">Master fluency by repeating the same topic with decreasing time constraints.</p>

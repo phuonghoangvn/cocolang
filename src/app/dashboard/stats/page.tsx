@@ -75,9 +75,12 @@ export default async function StatsPage() {
   const totalDone = allProgress.length;
 
   const hoursSpent = Math.max(0, (totalDone * 15) / 60);
-  const targetHours = 200; // Average for B1->B2, B2->C1
+  const currentMilestoneMultiplier = Math.floor(hoursSpent / 200) + 1;
+  const targetHours = currentMilestoneMultiplier * 200;
+  const milestoneStartHours = (currentMilestoneMultiplier - 1) * 200;
+  const hoursInCurrentMilestone = hoursSpent - milestoneStartHours;
   const hoursRemaining = Math.max(0, targetHours - hoursSpent);
-  const completionPercentage = Math.min(100, Math.round((hoursSpent / targetHours) * 100));
+  const completionPercentage = Math.min(100, Math.round((hoursInCurrentMilestone / 200) * 100));
 
   return (
     <div className="p-6 max-w-4xl mx-auto">

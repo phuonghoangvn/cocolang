@@ -41,7 +41,7 @@ export default function WriteWorkspace({ task, isCompleted }: { task: any; isCom
         />
       )}
 
-      <div className="max-w-3xl mx-auto flex flex-col h-full py-6">
+      <div className="max-w-3xl mx-auto flex flex-col min-h-[70vh] md:h-full py-6 px-4 md:px-0">
         <div className="mb-6 flex justify-between items-start">
           <div>
             <h2 className="text-xl font-bold text-zinc-900">Writing Prompt</h2>
@@ -55,7 +55,7 @@ export default function WriteWorkspace({ task, isCompleted }: { task: any; isCom
             onChange={(e) => setContent(e.target.value)}
             disabled={isCompleted}
             placeholder="Start drafting your essay here..."
-            className="flex-1 w-full p-6 resize-none focus:outline-none text-zinc-800 leading-relaxed text-lg disabled:bg-zinc-50"
+            className="flex-1 w-full p-4 md:p-6 resize-none min-h-[250px] md:min-h-0 focus:outline-none text-zinc-800 leading-relaxed text-base md:text-lg disabled:bg-zinc-50"
           />
           <div className="bg-zinc-50 border-t border-zinc-200 px-6 py-4 flex items-center justify-between">
             <div className="text-sm font-medium text-zinc-500 font-mono">
