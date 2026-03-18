@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   }
 
   const allTasks = await prisma.task.findMany({
-    orderBy: [{ level: "asc" }, { type: "asc" }],
+    orderBy: [{ level: "asc" }, { day: "asc" }],
   });
 
   const progress = await prisma.userProgress.findMany({

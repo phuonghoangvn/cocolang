@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   const tasks = await prisma.task.findMany({
     where: whereClause,
-    orderBy: [{ level: "asc" }, { type: "asc" }],
+    orderBy: [{ level: "asc" }, { day: "asc" }],
   });
 
   return NextResponse.json({ tasks });

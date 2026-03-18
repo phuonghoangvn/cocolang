@@ -75,10 +75,13 @@ export default function DuolingoRoadmap({
     if (grouped[level]?.length > 0) {
       const currentCount = grouped[level].length;
       if (currentCount < TARGET_NODES_PER_LEVEL) {
-        for (let i = currentCount; i < TARGET_NODES_PER_LEVEL; i++) {
+        // Find the type index of the last real task to continue the cycle
+        const lastRealTask = grouped[level][currentCount - 1];
+        const lastTypeIdx = lastRealTask ? ALL_TYPES.indexOf(lastRealTask.type) : -1;
+        for (let i = 0; i < TARGET_NODES_PER_LEVEL - currentCount; i++) {
           grouped[level].push({
             id: `virtual-${level}-${i}`,
-            type: ALL_TYPES[i % ALL_TYPES.length],
+            type: ALL_TYPES[(lastTypeIdx + 1 + i) % ALL_TYPES.length],
             title: "Future Milestone",
             isVirtual: true,
           });
