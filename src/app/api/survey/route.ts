@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { avatar, nativeLanguage, learningGoal, currentLevel, dailyGoalMinutes, activeTrack } = body;
+  const { avatar, nativeLanguage, learningGoal, currentLevel, dailyGoalMinutes, goalDeadlineDays, activeTrack } = body;
 
   await prisma.user.update({
     where: { id: session.user.id },
@@ -20,8 +20,27 @@ export async function POST(req: NextRequest) {
       learningGoal,
       currentLevel,
       dailyGoalMinutes: Number(dailyGoalMinutes),
-      activeTrack: activeTrack as any,
+      goalDeadlineDays: Number(goalDeadlineDays) || 30,
+      activeTrack: (activeTrack as any) || "UX_ENGLISH",
       surveyCompleted: true,
+    },
+  });
+
+  // Also create the default English course enrollment
+  await prisma.courseEnrollment.upsert({
+    where: { userId_category: { userId: session.user.id, category: "UX_ENGLISH" } },
+    update: {
+      learningGoal,
+      currentLevel,
+      goalDeadlineDays: Number(goalDeadlineDays) || 30,
+    },
+    create: {
+      userId: session.user.id,
+      category: "UX_ENGLISH",
+      learningGoal,
+      currentLevel,
+      targetLevel: "C1",
+      goalDeadlineDays: Number(goalDeadlineDays) || 30,
     },
   });
 

@@ -45,12 +45,14 @@ model User {
   learningGoal      String?        // e.g. "Work abroad", "Travel", etc.
   currentLevel      String?        // Self-assessed level
   dailyGoalMinutes  Int?           @default(15)
-  activeTrack       Category       @default(SWEDISH)
+  goalDeadlineDays  Int?           @default(30) // How many days to reach target
+  activeTrack       Category       @default(UX_ENGLISH)
 
   // Email notifications
   emailReminders    Boolean        @default(true)
 
   progress          UserProgress[]
+  enrollments       CourseEnrollment[]
 }
 
 model Task {
@@ -78,4 +80,20 @@ model UserProgress {
   task          Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@unique([userId, taskId]) 
+}
+
+// Per-course enrollment with customized goals
+model CourseEnrollment {
+  id               String   @id @default(cuid())
+  userId           String
+  category         Category
+  learningGoal     String?  // e.g. "work", "travel", "culture"
+  currentLevel     String?  // Starting level e.g. "B1"
+  targetLevel      String?  // Desired level e.g. "C1"
+  goalDeadlineDays Int      @default(30)
+  enrolledAt       DateTime @default(now())
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
 }

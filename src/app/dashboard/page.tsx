@@ -80,7 +80,7 @@ export default async function DashboardPage() {
         <RoadmapWrapper
           tasks={allTasks as any[]}
           completedIds={completedTaskIds}
-          initialTrack={(userStats?.activeTrack as string) || "SWEDISH"}
+          initialTrack={(userStats?.activeTrack as string) || "UX_ENGLISH"}
           userAvatar={userStats?.avatar || "🦜"}
         />
       </div>

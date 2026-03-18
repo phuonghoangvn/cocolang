@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Mic, Headphones, BookOpen, PenTool, HelpCircle,
-  CheckCircle2, Lock, ChevronDown, Globe, Star, Zap
+  CheckCircle2, Lock, ChevronDown, Zap, Plus, Loader2
 } from "lucide-react";
+import SwedishSurveyModal from "@/components/SwedishSurveyModal";
 
 const TASK_TYPE_CONFIG = {
   SPEAK: { icon: Mic, label: "Speak", color: "#f43f5e", bg: "#fff1f2", nodeGrad: "from-rose-400 to-pink-500" },
@@ -25,28 +26,25 @@ const LEVEL_COLORS: Record<string, string> = {
   C1: "from-rose-400 to-pink-500",
 };
 
-// Zigzag positions for nodes in a snake pattern
-function getNodePosition(index: number, totalPerRow = 4) {
-  const row = Math.floor(index / totalPerRow);
-  const col = index % totalPerRow;
-  const isEvenRow = row % 2 === 0;
-  const x = isEvenRow ? col : totalPerRow - 1 - col;
-  return { x, y: row };
-}
-
 interface TrackRoadmapProps {
   tasks: any[];
   completedIds: string[];
   activeTrack: string;
+  enrolledTracks: string[];
   onSwitchTrack: (t: string) => void;
+  onEnrollSwedish: () => void;
   userAvatar: string;
 }
 
 export default function DuolingoRoadmap({
-  tasks, completedIds, activeTrack, onSwitchTrack, userAvatar
+  tasks, completedIds, activeTrack, enrolledTracks, onSwitchTrack, onEnrollSwedish, userAvatar
 }: TrackRoadmapProps) {
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [showSwedishModal, setShowSwedishModal] = useState(false);
+  const [generatingSwedish, setGeneratingSwedish] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
+
+  const isSwedishEnrolled = enrolledTracks.includes("SWEDISH");
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -70,8 +68,56 @@ export default function DuolingoRoadmap({
 
   const NODES_PER_ROW = 4;
 
+  const COURSE_CONFIG = [
+    {
+      value: "UX_ENGLISH",
+      label: "English",
+      emoji: "🇬🇧",
+      gradient: "from-sky-500 to-blue-600",
+      enrolled: true, // always enrolled by default
+    },
+    {
+      value: "SWEDISH",
+      label: "Swedish",
+      emoji: "🇸🇪",
+      gradient: "from-yellow-400 to-amber-500",
+      enrolled: isSwedishEnrolled,
+    },
+  ];
+
+  const handleSwedishClick = () => {
+    if (isSwedishEnrolled) {
+      onSwitchTrack("SWEDISH");
+      setShowSwitcher(false);
+    } else {
+      setShowSwitcher(false);
+      setShowSwedishModal(true);
+    }
+  };
+
+  const handleSwedishEnrollComplete = () => {
+    setShowSwedishModal(false);
+    setGeneratingSwedish(true);
+    onEnrollSwedish();
+    // Switch to Swedish track after enrolling
+    setTimeout(() => {
+      onSwitchTrack("SWEDISH");
+      setGeneratingSwedish(false);
+    }, 1500);
+  };
+
+  const activeConfig = COURSE_CONFIG.find((c) => c.value === activeTrack) || COURSE_CONFIG[0];
+
   return (
     <div className="flex flex-col">
+      {/* Swedish modal */}
+      {showSwedishModal && (
+        <SwedishSurveyModal
+          onClose={() => setShowSwedishModal(false)}
+          onComplete={handleSwedishEnrollComplete}
+        />
+      )}
+
       {/* Course switcher header */}
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-zinc-100 px-6 py-3.5 flex items-center justify-between">
         <div className="relative" ref={switcherRef}>
@@ -79,45 +125,82 @@ export default function DuolingoRoadmap({
             onClick={() => setShowSwitcher((v) => !v)}
             className="flex items-center gap-3 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors font-bold text-sm text-zinc-900"
           >
-            <span className="text-lg">{activeTrack === "SWEDISH" ? "🇸🇪" : "🇬🇧"}</span>
-            {activeTrack === "SWEDISH" ? "Swedish" : "English"}
+            <span className="text-lg">{activeConfig.emoji}</span>
+            {activeConfig.label}
             <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${showSwitcher ? "rotate-180" : ""}`} />
           </button>
 
           {showSwitcher && (
-            <div className="absolute top-full left-0 mt-2 bg-white border border-zinc-200 rounded-2xl shadow-xl overflow-hidden z-30 min-w-[200px]">
+            <div className="absolute top-full left-0 mt-2 bg-white border border-zinc-200 rounded-2xl shadow-xl overflow-hidden z-30 min-w-[220px]">
               <div className="px-4 py-2 text-[10px] font-black tracking-widest text-zinc-400 uppercase border-b border-zinc-100">
                 MY COURSES
               </div>
-              {[
-                { value: "SWEDISH", label: "Swedish", emoji: "🇸🇪" },
-                { value: "UX_ENGLISH", label: "English", emoji: "🇬🇧" },
-              ].map((t) => (
+
+              {/* English (always available) */}
+              <button
+                onClick={() => { onSwitchTrack("UX_ENGLISH"); setShowSwitcher(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-sky-50 transition-colors ${
+                  activeTrack === "UX_ENGLISH" ? "bg-sky-50 text-sky-700" : "text-zinc-700"
+                }`}
+              >
+                <span className="text-xl">🇬🇧</span>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-sm">English</p>
+                  <p className="text-[10px] text-zinc-400">B1 → C1</p>
+                </div>
+                {activeTrack === "UX_ENGLISH" && <CheckCircle2 className="w-4 h-4 text-sky-500" />}
+              </button>
+
+              {/* Swedish – enrolled or add */}
+              {isSwedishEnrolled ? (
                 <button
-                  key={t.value}
-                  onClick={() => { onSwitchTrack(t.value); setShowSwitcher(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-sky-50 transition-colors ${
-                    activeTrack === t.value ? "bg-sky-50 text-sky-700" : "text-zinc-700"
+                  onClick={handleSwedishClick}
+                  className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-amber-50 transition-colors ${
+                    activeTrack === "SWEDISH" ? "bg-amber-50 text-amber-700" : "text-zinc-700"
                   }`}
                 >
-                  <span className="text-xl">{t.emoji}</span>
-                  <span className="font-semibold text-sm">{t.label}</span>
-                  {activeTrack === t.value && <CheckCircle2 className="w-4 h-4 text-sky-500 ml-auto" />}
+                  <span className="text-xl">🇸🇪</span>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-sm">Swedish</p>
+                    <p className="text-[10px] text-zinc-400">Custom roadmap</p>
+                  </div>
+                  {activeTrack === "SWEDISH" && <CheckCircle2 className="w-4 h-4 text-amber-500" />}
                 </button>
-              ))}
+              ) : (
+                <button
+                  onClick={handleSwedishClick}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors text-zinc-500 border-t border-zinc-100"
+                >
+                  <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                    <Plus className="w-4 h-4 text-zinc-400" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-sm text-zinc-700">Add Swedish</p>
+                    <p className="text-[10px] text-zinc-400">Customize your roadmap</p>
+                  </div>
+                  <span className="text-[10px] font-black bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">NEW</span>
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full">
-          <Zap className="w-3.5 h-3.5" />
-          {totalDone} done
+        <div className="flex items-center gap-2">
+          {generatingSwedish && (
+            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full animate-pulse">
+              <Loader2 className="w-3 h-3 animate-spin" /> Generating roadmap...
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full">
+            <Zap className="w-3.5 h-3.5" />
+            {totalDone} done
+          </div>
         </div>
       </div>
 
       {/* Roadmap path */}
       <div className="px-6 py-8 space-y-12">
-        {LEVEL_ORDER.filter((lvl) => grouped[lvl]?.length > 0).map((level, levelIdx) => {
+        {LEVEL_ORDER.filter((lvl) => grouped[lvl]?.length > 0).map((level) => {
           const levelTasks = grouped[level];
           const levelGrad = LEVEL_COLORS[level] || "from-zinc-400 to-zinc-500";
 
@@ -136,9 +219,7 @@ export default function DuolingoRoadmap({
 
               {/* Snake path nodes */}
               <div className="relative">
-                {/* Connector lines drawn as absolute positioned divs */}
                 <div className="flex flex-col gap-4">
-                  {/* Chunk tasks into rows of NODES_PER_ROW */}
                   {Array.from({ length: Math.ceil(levelTasks.length / NODES_PER_ROW) }, (_, rowIdx) => {
                     const rowTasks = levelTasks.slice(rowIdx * NODES_PER_ROW, (rowIdx + 1) * NODES_PER_ROW);
                     const isEvenRow = rowIdx % 2 === 0;
@@ -214,10 +295,15 @@ export default function DuolingoRoadmap({
           );
         })}
 
+        {/* Empty state */}
         {filtered.length === 0 && (
           <div className="text-center py-20 text-zinc-400">
             <div className="text-5xl mb-4">✨</div>
-            <p className="font-semibold">Generating your curriculum with AI...</p>
+            <p className="font-semibold">
+              {generatingSwedish
+                ? "Building your personalized Swedish roadmap with AI..."
+                : "Generating your curriculum with AI..."}
+            </p>
             <p className="text-sm mt-1">Check back in a moment!</p>
           </div>
         )}

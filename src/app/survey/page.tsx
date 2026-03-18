@@ -19,23 +19,23 @@ const SURVEY_STEPS = [
   },
   {
     id: "goal",
-    mascotText: "Tại sao bạn muốn học?",
+    mascotText: "Tại sao bạn muốn học tiếng Anh?",
     title: "What's your learning goal?",
   },
   {
     id: "level",
-    mascotText: "Trình độ hiện tại của bạn như thế nào?",
-    title: "What is your current level?",
+    mascotText: "Trình độ tiếng Anh hiện tại của bạn như thế nào?",
+    title: "What is your current English level?",
+  },
+  {
+    id: "deadline",
+    mascotText: "Bạn muốn đạt mục tiêu trong bao lâu? ⏰",
+    title: "How long to reach your goal?",
   },
   {
     id: "daily",
     mascotText: "Mỗi ngày bạn có thể dành bao nhiêu thời gian?",
     title: "How much time per day?",
-  },
-  {
-    id: "track",
-    mascotText: "Bạn muốn bắt đầu học ngôn ngữ nào trước?",
-    title: "Choose your first course",
   },
 ];
 
@@ -54,15 +54,19 @@ const LEVELS = [
   { value: "intermediate", label: "🌳 Intermediate (B1-B2)", desc: "Can hold a conversation" },
   { value: "advanced", label: "🏆 Advanced (C1+)", desc: "Nearly fluent" },
 ];
+const DEADLINE_OPTIONS = [
+  { value: 7, label: "1 week", emoji: "⚡", desc: "Extreme sprint!", intensity: "EXTREME" },
+  { value: 14, label: "2 weeks", emoji: "🔥", desc: "Hardcore grind", intensity: "HARD" },
+  { value: 30, label: "1 month", emoji: "🚀", desc: "Intensive focus", intensity: "INTENSIVE" },
+  { value: 60, label: "2 months", emoji: "🏃", desc: "Steady & serious", intensity: "SERIOUS" },
+  { value: 90, label: "3 months", emoji: "🚶", desc: "Comfortable pace", intensity: "COMFORTABLE" },
+  { value: 180, label: "6 months", emoji: "🐌", desc: "Relaxed journey", intensity: "RELAXED" },
+];
 const DAILY_GOALS = [
   { value: 5, label: "5 min", emoji: "🐌", desc: "Casual" },
   { value: 10, label: "10 min", emoji: "🚶", desc: "Regular" },
   { value: 15, label: "15 min", emoji: "🏃", desc: "Serious" },
   { value: 30, label: "30 min", emoji: "🚀", desc: "Intensive" },
-];
-const TRACKS = [
-  { value: "SWEDISH", label: "Swedish", emoji: "🇸🇪", desc: "A1 → C1 full journey", color: "from-yellow-400 to-amber-500" },
-  { value: "UX_ENGLISH", label: "English", emoji: "🇬🇧", desc: "B1 → C1 in 30 days", color: "from-sky-400 to-blue-600" },
 ];
 
 interface SurveyData {
@@ -70,6 +74,7 @@ interface SurveyData {
   nativeLanguage: string;
   learningGoal: string;
   currentLevel: string;
+  goalDeadlineDays: number;
   dailyGoalMinutes: number;
   activeTrack: string;
 }
@@ -82,8 +87,9 @@ export default function SurveyPage() {
     nativeLanguage: "",
     learningGoal: "",
     currentLevel: "",
+    goalDeadlineDays: 30,
     dailyGoalMinutes: 15,
-    activeTrack: "SWEDISH",
+    activeTrack: "UX_ENGLISH",
   });
   const [submitting, setSubmitting] = useState(false);
   const [mascotBounce, setMascotBounce] = useState(false);
@@ -103,8 +109,8 @@ export default function SurveyPage() {
     if (currentStep.id === "native") return !!data.nativeLanguage;
     if (currentStep.id === "goal") return !!data.learningGoal;
     if (currentStep.id === "level") return !!data.currentLevel;
+    if (currentStep.id === "deadline") return !!data.goalDeadlineDays;
     if (currentStep.id === "daily") return !!data.dailyGoalMinutes;
-    if (currentStep.id === "track") return !!data.activeTrack;
     return false;
   };
 
@@ -129,6 +135,8 @@ export default function SurveyPage() {
       router.push("/dashboard");
     }
   };
+
+  const selectedDeadline = DEADLINE_OPTIONS.find((d) => d.value === data.goalDeadlineDays);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white flex flex-col">
@@ -241,6 +249,44 @@ export default function SurveyPage() {
             </div>
           )}
 
+          {/* DEADLINE */}
+          {currentStep.id === "deadline" && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                {DEADLINE_OPTIONS.map((d) => (
+                  <button
+                    key={d.value}
+                    onClick={() => setData((prev) => ({ ...prev, goalDeadlineDays: d.value }))}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                      data.goalDeadlineDays === d.value
+                        ? "border-sky-400 bg-sky-50 shadow-md"
+                        : "border-zinc-200 bg-white hover:border-zinc-300"
+                    }`}
+                  >
+                    <p className="text-2xl mb-1">{d.emoji}</p>
+                    <p className="font-black text-zinc-900 text-base">{d.label}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{d.desc}</p>
+                    <span className={`inline-block mt-2 text-[10px] font-black px-2 py-0.5 rounded-full ${
+                      d.intensity === "EXTREME" ? "bg-red-100 text-red-600" :
+                      d.intensity === "HARD" ? "bg-orange-100 text-orange-600" :
+                      d.intensity === "INTENSIVE" ? "bg-amber-100 text-amber-600" :
+                      d.intensity === "SERIOUS" ? "bg-blue-100 text-blue-600" :
+                      d.intensity === "COMFORTABLE" ? "bg-emerald-100 text-emerald-600" :
+                      "bg-zinc-100 text-zinc-500"
+                    }`}>
+                      {d.intensity}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {selectedDeadline && (
+                <div className="mt-2 bg-sky-50 border border-sky-200 rounded-xl px-4 py-3 text-sm text-sky-700 font-medium">
+                  🎯 We&apos;ll generate a <strong>{selectedDeadline.intensity.toLowerCase()}</strong> roadmap with tasks packed into <strong>{selectedDeadline.label}</strong> to hit your goal!
+                </div>
+              )}
+            </div>
+          )}
+
           {/* DAILY GOAL */}
           {currentStep.id === "daily" && (
             <div className="grid grid-cols-2 gap-3">
@@ -257,32 +303,6 @@ export default function SurveyPage() {
                   <p className="text-3xl mb-1">{g.emoji}</p>
                   <p className="font-black text-zinc-900 text-lg">{g.label}</p>
                   <p className="text-xs text-zinc-400 mt-0.5">{g.desc}</p>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* TRACK */}
-          {currentStep.id === "track" && (
-            <div className="space-y-4">
-              {TRACKS.map((t) => (
-                <button
-                  key={t.value}
-                  onClick={() => setData((d) => ({ ...d, activeTrack: t.value }))}
-                  className={`w-full p-6 rounded-2xl border-2 flex items-center gap-5 transition-all ${
-                    data.activeTrack === t.value
-                      ? "border-sky-400 bg-sky-50 shadow-md shadow-sky-100"
-                      : "border-zinc-200 bg-white hover:border-zinc-300"
-                  }`}
-                >
-                  <span className="text-5xl">{t.emoji}</span>
-                  <div className="text-left">
-                    <p className="font-black text-zinc-900 text-xl">{t.label}</p>
-                    <p className="text-sm text-zinc-500">{t.desc}</p>
-                  </div>
-                  {data.activeTrack === t.value && (
-                    <Check className="w-6 h-6 text-sky-500 ml-auto" />
-                  )}
                 </button>
               ))}
             </div>
