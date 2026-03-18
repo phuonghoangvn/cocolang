@@ -96,10 +96,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
         </div>
 
         <div className="mb-8">
-          <h3 className="font-bold text-lg md:text-xl text-zinc-900 mb-2 leading-tight">
-            {parsedData.question}
-          </h3>
-          <p className="text-sm text-zinc-500 mb-4 font-medium">Type your summary or transcription below.</p>
+          <p className="text-sm text-zinc-500 mb-4 font-medium">Watch the video and type your summary or transcription below.</p>
           
           <textarea
             disabled={isCompleted || isPending}

@@ -76,7 +76,7 @@ export default async function TaskPage({ params }: { params: Promise<{ taskId: s
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-zinc-950">{task.title}</h1>
+            <h1 className="text-xl font-bold text-zinc-950">{task.type === "LISTEN" ? "🎧 Listening Practice" : task.title}</h1>
             <p className="text-sm text-zinc-500">Day {task.day} • {task.level}</p>
           </div>
         </div>
