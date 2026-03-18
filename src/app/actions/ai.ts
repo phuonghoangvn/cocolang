@@ -51,10 +51,17 @@ function buildTaskPrompt(params: {
     (deadlineDays ?? 30) <= 60 ? "MODERATE – balanced content with steady progression" :
     "RELAXED – comfortable, enjoyable content with gradual build-up";
 
+  const ENGLISH_VIDEOS = ["reYcgvTEXBE", "8rDJmX7S5aM", "RJKK8q9b54Q", "9vJRopau0g0", "F0YdOETyOCQ", "iG9CE55wbtY"];
+  const SWEDISH_VIDEOS = ["L9y_eC6FepQ", "pXzB187H5fE", "Xz_Xv3N_tOQ", "yY8pUvG766o", "7Yq3E9g5OEQ"];
+  
+  const videoId = isSwedish 
+    ? SWEDISH_VIDEOS[Math.floor(Math.random() * SWEDISH_VIDEOS.length)] 
+    : ENGLISH_VIDEOS[Math.floor(Math.random() * ENGLISH_VIDEOS.length)];
+
   const typeInstructions: Record<TaskType, string> = {
-    READ: "Provide a short, interesting reading passage (50–100 words) in the TARGET language on a topic highly relevant to the learner's goal. Include 1 comprehension question at the end.",
-    LISTEN: "Provide a realistic dialogue or monologue transcript (50–80 words) that the user 'heard'. Make it conversational and goal-relevant. Ask 1 question based on what they heard.",
-    SPEAK: "Provide a clear, open-ended speaking prompt (1–2 sentences) for the learner to answer by recording their voice for 60 seconds. It should feel practical and goal-aligned.",
+    READ: "Provide an excerpt from a real, recent article or research paper related to AI, UI/UX, Business, or Technology in the target language. Put the Title at the top, followed by a 100-word excerpt, and end with a comprehension question.",
+    LISTEN: `You will create a quiz for a real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Your question related to technology/business/AI? | Option A | Option B | Option C | Option D | CorrectIndex (0-3)".`,
+    SPEAK: "Provide a challenging open-ended speaking prompt. The learner will practice the 4-3-2 method (speaking on the exact same topic for 4 mins, then 3 mins, then 2 mins). Describe the scenario clearly.",
     WRITE: "Provide a writing scenario or prompt that requires the learner to write 3–5 sentences in the target language. The scenario should directly relate to their real-world goal.",
     QUIZ: "Provide a multiple-choice question testing vocabulary or grammar at this CEFR level. Format: \"Question? | Option A | Option B | Option C | Option D | CorrectIndex\" (0-indexed).",
   };
