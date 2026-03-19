@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+import { revalidatePath } from "next/cache";
+
 export async function completeTask(taskId: string, userContent?: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -117,5 +119,9 @@ export async function completeTask(taskId: string, userContent?: string) {
     });
   }
 
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/stats");
+  revalidatePath("/dashboard/leaderboard");
+  
   return { success: true };
 }

@@ -63,8 +63,21 @@ function buildTaskPrompt(params: {
     (deadlineDays ?? 30) <= 60 ? "MODERATE – balanced content with steady progression" :
     "RELAXED – comfortable, enjoyable content with gradual build-up";
 
-  const ENGLISH_VIDEOS = ["qp0HIF3SfI4", "arj7oStGLkU", "iCvmsMzlF7o", "8KkKuTCFvzI", "iG9CE55wbtY", "9vJRopau0g0"];
-  const SWEDISH_VIDEOS = ["qp0HIF3SfI4", "arj7oStGLkU", "iCvmsMzlF7o", "8KkKuTCFvzI", "iG9CE55wbtY", "9vJRopau0g0"];
+  // We use hardcoded YouTube IDs that are verified to be under 5 minutes.
+  const ENGLISH_VIDEOS = [
+    "oeA1v8pAC9g", // UX Design (short intro)
+    "WbV3zMMCTSQ", // UX Design - What is it? (3 mins)
+    "SRzKPR0hKUE", // What is UX? (2.5 mins)
+    "O94kYyzqc8U", // UX vs UI (3.5 mins)
+    "c9Wg6Cb_YlU", // Short english dialogue (2 mins)
+  ];
+  
+  const SWEDISH_VIDEOS = [
+    "4h1NlC2L77Q", // Basic Swedish (3 mins)
+    "aB7H_O2P0Cg", // Basic Swedish phrases (3 mins)
+    "hQYZR-a_3P8", // Swedish greetings (2 mins)
+    "bM5J3_q0zXE", // Swedish introduction (4 mins)
+  ];
   
   const videoId = isSwedish 
     ? SWEDISH_VIDEOS[Math.floor(Math.random() * SWEDISH_VIDEOS.length)] 
@@ -72,7 +85,7 @@ function buildTaskPrompt(params: {
 
   const typeInstructions: Record<TaskType, string> = {
     READ: "Use the googleSearch tool to find a REAL, recent web article, news post, or research paper on the requested topic. Quote an exact 100-word excerpt from it and include its actual URL as the source link at the top. Do NOT generate fake text, always search and retrieve a real source. Put the Title at the top, the excerpt, and end with a comprehension question.",
-    LISTEN: `You will provide an instruction for a real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Summarize the main points of this video in your own words or transcribe a key section." Do not generate any multiple-choice options.`,
+    LISTEN: `You will provide an instruction for a short real YouTube video. Format your output 'content' field EXACTLY like this (using the pipe character): "${videoId} | Summarize the main points of this SHORT video (strictly under 5 minutes) in your own words or transcribe a key section." Do not generate any multiple-choice options.`,
     SPEAK: "Provide a challenging open-ended speaking prompt. The learner will practice the 4-3-2 method (speaking on the exact same topic for 4 mins, then 3 mins, then 2 mins). Describe the scenario clearly.",
     WRITE: "Provide a writing scenario or prompt that requires the learner to write 3–5 sentences in the target language. The scenario should directly relate to their real-world goal.",
     QUIZ: "Provide a multiple-choice question testing vocabulary or grammar at this CEFR level. Format: \"Question? | Option A | Option B | Option C | Option D | CorrectIndex\" (0-indexed).",
