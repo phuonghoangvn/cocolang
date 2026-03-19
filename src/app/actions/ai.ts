@@ -228,7 +228,7 @@ export async function generateRoadmapForEnrollment(params: {
   const effectiveLevels: Level[] =
     category === "UX_ENGLISH" ? (["B1", "B2", "C1"] as Level[]) : levelsToGenerate.length > 0 ? levelsToGenerate : ALL_LEVELS;
 
-  const TASK_TYPES: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
+  const TASK_TYPES: TaskType[] = ["READ", "SPEAK", "LISTEN", "WRITE"];
   const tasksPerLevel = calcTasksPerLevel(goalDeadlineDays, effectiveLevels.length);
 
   console.log(
@@ -288,7 +288,7 @@ export async function generateRoadmapForEnrollment(params: {
 export async function generateFullCurriculum() {
   const englishLevels: Level[] = ["B1", "B2", "C1"];
   const swedishLevels: Level[] = ["A1", "A2", "B1", "B2", "C1"];
-  const taskTypes: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
+  const taskTypes: TaskType[] = ["READ", "SPEAK", "LISTEN", "WRITE"];
 
   const tracks: { category: Category; levels: Level[] }[] = [
     { category: "UX_ENGLISH", levels: englishLevels },
@@ -332,7 +332,7 @@ export async function autoGenerateNextRoadmapTask() {
     orderBy: { day: "desc" },
   });
 
-  const CYCLE: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
+  const CYCLE: TaskType[] = ["READ", "SPEAK", "LISTEN", "WRITE"];
 
   let category: Category = "UX_ENGLISH";
   let level: Level = "B1";
@@ -357,7 +357,7 @@ export async function autoGenerateNextRoadmapTask() {
 // Auto-ensure English curriculum exists at dashboard load
 export async function ensureCurriculumExists() {
   const englishLevels: Level[] = ["B1", "B2", "C1"];
-  const taskTypes: TaskType[] = ["SPEAK", "LISTEN", "READ", "WRITE"];
+  const taskTypes: TaskType[] = ["READ", "SPEAK", "LISTEN", "WRITE"];
 
   let generated = 0;
 

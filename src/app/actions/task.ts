@@ -59,7 +59,18 @@ export async function completeTask(taskId: string, userContent?: string) {
   
   if (user) {
     let newStreak = user.currentStreak;
+    let newWeeklyXp = user.weeklyXp || 0;
     const now = new Date();
+    
+    // Helper to get start of Monday for a given date
+    const getMondayStart = (d: Date) => {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(date.setDate(diff));
+      monday.setHours(0, 0, 0, 0);
+      return monday.getTime();
+    };
     
     if (user.lastCompletedDate) {
       const yesterdayStart = new Date(now);
@@ -80,15 +91,26 @@ export async function completeTask(taskId: string, userContent?: string) {
         newStreak = 1; 
       }
       // If completed another task today earlier, streak stays the same (assuming 1 increment per day max)
+
+      // Weekly XP reset logic
+      const lastMonday = getMondayStart(user.lastCompletedDate);
+      const thisMonday = getMondayStart(now);
+      if (lastMonday < thisMonday) {
+        newWeeklyXp = 0;
+      }
     } else {
       // First task completed
       newStreak = 1; 
+      newWeeklyXp = 0;
     }
+
+    newWeeklyXp += task.xpReward;
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
         totalXp: user.totalXp + task.xpReward,
+        weeklyXp: newWeeklyXp,
         currentStreak: newStreak,
         lastCompletedDate: now,
       },

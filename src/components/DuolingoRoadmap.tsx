@@ -69,7 +69,7 @@ export default function DuolingoRoadmap({
 
   // Pad each level with virtual locked tasks to visually represent the 200-300 hours required per level
   const TARGET_NODES_PER_LEVEL = 40; // 40 nodes per level to make it look huge
-  const ALL_TYPES = ["SPEAK", "LISTEN", "READ", "WRITE"];
+  const ALL_TYPES = ["READ", "SPEAK", "LISTEN", "WRITE"];
   
   for (const level of ["A1", "A2", "B1", "B2", "C1"]) {
     if (grouped[level]?.length > 0) {

@@ -36,6 +36,7 @@ model User {
   avatar            String?        // emoji avatar
   isBot             Boolean        @default(false)
   totalXp           Int            @default(0)
+  weeklyXp          Int            @default(0)
   currentStreak     Int            @default(0)
   lastCompletedDate DateTime?
 

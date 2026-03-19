@@ -9,15 +9,13 @@ export default async function LeaderboardPage() {
 
   const session = await getServerSession(authOptions);
 
-  // Fetch real users only
-  const realUsers = await prisma.user.findMany({
-    where: { isBot: false },
-    orderBy: { totalXp: "desc" },
-    select: { id: true, name: true, totalXp: true, currentStreak: true, isBot: true },
+  // Fetch users (including bots for gamification)
+  const allUsersQuery = await prisma.user.findMany({
+    orderBy: { weeklyXp: "desc" }, 
+    select: { id: true, name: true, totalXp: true, weeklyXp: true, currentStreak: true, isBot: true },
   });
 
-  // Only real users
-  const allUsers = [...realUsers].slice(0, 12);
+  const allUsers = [...allUsersQuery].slice(0, 12);
 
   const currentUserId = session?.user?.id;
 
@@ -26,7 +24,7 @@ export default async function LeaderboardPage() {
       <div className="text-center mb-8 mt-2">
         <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-2 mb-4">
           <Crown className="w-5 h-5 text-yellow-500 fill-yellow-200" />
-          <span className="text-sm font-bold text-yellow-700">Global Leaderboard</span>
+          <span className="text-sm font-bold text-yellow-700">Weekly Leaderboard</span>
         </div>
         <h1 className="text-2xl font-black tracking-tight text-zinc-950">
           Who&apos;s On Top?
@@ -51,14 +49,14 @@ export default async function LeaderboardPage() {
               <div key={u.id} className={`flex flex-col items-center gap-2 ${scale}`}>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-black ${
                   isYou ? "bg-gradient-to-br from-sky-400 to-violet-500 text-white" :
-                  u.isBot ? "bg-zinc-100 text-zinc-500" : "bg-zinc-900 text-white"
+                  "bg-zinc-900 text-white"
                 } shadow-lg`}>
                   {u.name?.charAt(0).toUpperCase() || "U"}
                 </div>
                 <p className="text-xs font-bold text-zinc-700 max-w-[80px] truncate text-center">
                   {u.name}{isYou ? " 👤" : ""}
                 </p>
-                <p className="text-xs font-black text-emerald-600">{u.totalXp.toLocaleString()} XP</p>
+                <p className="text-xs font-black text-emerald-600">{u.weeklyXp.toLocaleString()} XP</p>
                 <div className={`w-20 ${podiumHeight} ${medalBg[rank]} rounded-t-xl flex items-center justify-center border border-zinc-200`}>
                   <Medal className={`w-6 h-6 ${medalColors[rank]}`} />
                 </div>
@@ -114,19 +112,16 @@ export default async function LeaderboardPage() {
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                       isYou
                         ? "bg-gradient-to-br from-sky-400 to-violet-500 text-white"
-                        : user.isBot
-                        ? "bg-zinc-100 text-zinc-500"
                         : "bg-zinc-900 text-white"
                     }`}
                   >
                     {user.name?.charAt(0).toUpperCase() || "U"}
                   </div>
                   <div className="min-w-0">
-                    <span className={`text-sm font-semibold truncate block ${isYou ? "text-sky-800" : user.isBot ? "text-zinc-500" : "text-zinc-900"}`}>
+                    <span className={`text-sm font-semibold truncate block ${isYou ? "text-sky-800" : "text-zinc-900"}`}>
                       {user.name || "Anonymous"}
                     </span>
                     {isYou && <span className="text-[10px] text-sky-500 font-bold">You</span>}
-                    {user.isBot && !isYou && <span className="text-[10px] text-zinc-400">Bot</span>}
                   </div>
                 </div>
 
@@ -138,7 +133,7 @@ export default async function LeaderboardPage() {
 
                 {/* XP */}
                 <div className="text-right">
-                  <span className="text-sm font-black text-zinc-950">{user.totalXp.toLocaleString()}</span>
+                  <span className="text-sm font-black text-zinc-950">{user.weeklyXp.toLocaleString()}</span>
                 </div>
               </div>
             );
