@@ -20,7 +20,7 @@ export default async function LeaderboardPage() {
   const currentUserId = session?.user?.id;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto h-full flex flex-col">
+    <div className="p-6 max-w-3xl mx-auto flex flex-col min-h-full">
       <div className="text-center mb-8 mt-2">
         <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-2 mb-4">
           <Crown className="w-5 h-5 text-yellow-500 fill-yellow-200" />
