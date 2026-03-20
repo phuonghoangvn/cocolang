@@ -34,7 +34,23 @@ export default function RoadmapWrapper({ tasks, completedIds, initialTrack, user
       });
   }, []);
 
+  const handleSwitchTrack = async (track: string) => {
+    setActiveTrack(track);
+    // Persist to DB so it survives page reloads/redirects
+    try {
+      await fetch("/api/profile", {
+        method: "POST",
+        body: JSON.stringify({ activeTrack: track }),
+      });
+    } catch (e) {
+      console.error("Failed to persist active track", e);
+    }
+  };
+
   const handleEnrollSwedish = async () => {
+    // Also switch active track to Swedish in DB
+    handleSwitchTrack("SWEDISH");
+    
     // Optimistically add Swedish to enrolled tracks
     setEnrolledTracks((prev) => (prev.includes("SWEDISH") ? prev : [...prev, "SWEDISH"]));
     setLoadingMore(true);
@@ -72,7 +88,7 @@ export default function RoadmapWrapper({ tasks, completedIds, initialTrack, user
       completedIds={completedIds}
       activeTrack={activeTrack}
       enrolledTracks={enrolledTracks}
-      onSwitchTrack={setActiveTrack}
+      onSwitchTrack={handleSwitchTrack}
       onEnrollSwedish={handleEnrollSwedish}
       userAvatar={userAvatar}
     />

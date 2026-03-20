@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, avatar, dailyGoalMinutes, emailReminders } = body;
+  const { name, avatar, dailyGoalMinutes, emailReminders, activeTrack } = body;
 
   await prisma.user.update({
     where: { id: session.user.id },
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       avatar: avatar || undefined,
       dailyGoalMinutes: dailyGoalMinutes ? Number(dailyGoalMinutes) : undefined,
       emailReminders: typeof emailReminders === "boolean" ? emailReminders : undefined,
+      activeTrack: activeTrack || undefined,
     },
   });
 
