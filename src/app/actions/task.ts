@@ -58,54 +58,58 @@ export async function completeTask(taskId: string, userContent?: string) {
 
   // Calculate streak logic & Update XP
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  
+
+  let newStreak = 0;
+
   if (user) {
-    let newStreak = user.currentStreak;
+    let currentStreak = user.currentStreak;
     let newWeeklyXp = user.weeklyXp || 0;
     const now = new Date();
-    
-    // Helper to get start of Monday for a given date
-    const getMondayStart = (d: Date) => {
-      const date = new Date(d);
-      const day = date.getDay();
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(date.setDate(diff));
-      monday.setHours(0, 0, 0, 0);
-      return monday.getTime();
+
+    // Use UTC date string (YYYY-MM-DD) for consistent day comparison regardless of server timezone
+    const toUtcDateStr = (d: Date) =>
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+
+    // Get start of UTC Monday (for weekly XP reset)
+    const getMondayUtcTime = (d: Date) => {
+      const day = d.getUTCDay(); // 0 = Sunday
+      const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff);
     };
-    
+
     if (user.lastCompletedDate) {
-      const yesterdayStart = new Date(now);
-      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-      yesterdayStart.setHours(0, 0, 0, 0);
-
-      const yesterdayEnd = new Date(now);
-      yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
-      yesterdayEnd.setHours(23, 59, 59, 999);
-
       const lastDate = new Date(user.lastCompletedDate);
+      const todayUtc = toUtcDateStr(now);
+      const lastUtc = toUtcDateStr(lastDate);
 
-      // If they had a task completed yesterday, streak goes up
-      if (lastDate >= yesterdayStart && lastDate <= yesterdayEnd) {
-        newStreak += 1; 
-      } else if (lastDate < yesterdayStart) {
-        // More than a day gap, streak broken
-        newStreak = 1; 
+      // Calculate yesterday's UTC date string
+      const yesterday = new Date(now);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+      const yesterdayUtc = toUtcDateStr(yesterday);
+
+      if (lastUtc === yesterdayUtc) {
+        // Completed yesterday → extend streak
+        currentStreak += 1;
+      } else if (lastUtc === todayUtc) {
+        // Already completed today → keep streak as-is (no double increment)
+      } else {
+        // Gap of more than 1 day → streak broken
+        currentStreak = 1;
       }
-      // If completed another task today earlier, streak stays the same (assuming 1 increment per day max)
 
-      // Weekly XP reset logic
-      const lastMonday = getMondayStart(user.lastCompletedDate);
-      const thisMonday = getMondayStart(now);
+      // Weekly XP reset: compare UTC Mondays
+      const lastMonday = getMondayUtcTime(lastDate);
+      const thisMonday = getMondayUtcTime(now);
       if (lastMonday < thisMonday) {
         newWeeklyXp = 0;
       }
     } else {
-      // First task completed
-      newStreak = 1; 
+      // First task ever completed
+      currentStreak = 1;
       newWeeklyXp = 0;
     }
 
+    newStreak = currentStreak;
     newWeeklyXp += task.xpReward;
 
     await prisma.user.update({
@@ -122,6 +126,7 @@ export async function completeTask(taskId: string, userContent?: string) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/stats");
   revalidatePath("/dashboard/leaderboard");
-  
-  return { success: true };
+  revalidatePath("/", "layout"); // Refresh layout so streak in navbar updates
+
+  return { success: true, newStreak, xpEarned: task.xpReward };
 }

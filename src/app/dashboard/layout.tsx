@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import DailyWelcomePopup from "@/components/DailyWelcomePopup";
 import {
   BookOpen,
   LogOut,
@@ -41,6 +42,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-[100dvh] bg-zinc-50 flex-col md:flex-row overflow-hidden">
+      {/* Daily welcome popup — only shows once per day */}
+      <DailyWelcomePopup
+        name={userStats?.name || "Learner"}
+        streak={userStats?.currentStreak || 0}
+        xp={userStats?.totalXp || 0}
+        avatar={userStats?.avatar || "🦜"}
+      />
       {/* MOBILE TOP HEADER */}
       <header className="md:hidden flex items-center justify-between bg-white border-b border-zinc-200 px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">

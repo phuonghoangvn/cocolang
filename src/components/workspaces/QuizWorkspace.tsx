@@ -5,6 +5,7 @@ import { completeTask } from "@/app/actions/task";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import TaskCompletionCelebration from "@/components/TaskCompletionCelebration";
 import { useRouter } from "next/navigation";
+import { playQuizCorrectSound, playQuizWrongSound } from "@/lib/sounds";
 
 function parseQuizContent(content: string) {
   // Try to parse AI-formatted quiz: "Question? | Opt1 | Opt2 | Opt3 | Opt4 | CorrectIndex"
@@ -36,6 +37,7 @@ export default function QuizWorkspace({ task, isCompleted }: { task: any; isComp
   const [hasChecked, setHasChecked] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [newStreak, setNewStreak] = useState<number | undefined>(undefined);
   const router = useRouter();
 
   const isCorrect = selectedOption !== null && parsed.options[selectedOption].isCorrect;
@@ -43,10 +45,17 @@ export default function QuizWorkspace({ task, isCompleted }: { task: any; isComp
   const handleAction = () => {
     if (selectedOption !== null && !hasChecked) {
       setHasChecked(true);
+      // Play sound immediately on answer reveal
+      if (parsed.options[selectedOption].isCorrect) {
+        playQuizCorrectSound();
+      } else {
+        playQuizWrongSound();
+      }
     } else if (hasChecked && isCorrect) {
       startTransition(async () => {
         const res = await completeTask(task.id, parsed.options[selectedOption!].text);
         if (res.success) {
+          if (res.newStreak !== undefined) setNewStreak(res.newStreak);
           setShowCelebration(true);
         }
       });
@@ -61,10 +70,11 @@ export default function QuizWorkspace({ task, isCompleted }: { task: any; isComp
       {showCelebration && (
         <TaskCompletionCelebration
           xpReward={task.xpReward}
+          newStreak={newStreak}
           onFinish={() => {
             setShowCelebration(false);
-            router.push("/dashboard");
             router.refresh();
+            router.push("/dashboard");
           }}
         />
       )}

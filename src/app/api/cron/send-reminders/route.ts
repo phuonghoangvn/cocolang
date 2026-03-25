@@ -116,29 +116,31 @@ function createEmailHtml(userName: string, streak: number, xp: number) {
 }
 
 export async function GET(req: NextRequest) {
-  // Support both custom Authorization header and Vercel cron token
+  // Support both custom Authorization header and Vercel's internal cron header
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.replace("Bearer ", "");
-  const vercelCronSecret = req.headers.get("x-vercel-cron-token");
+  // Vercel sets x-vercel-cron-token with its own internal value (not CRON_SECRET)
+  // We trust Vercel's internal cron OR an explicit Bearer token matching CRON_SECRET
+  const isVercelCron = req.headers.get("x-vercel-cron-token") !== null;
 
-  const isAuthorized =
-    token === CRON_SECRET ||
-    vercelCronSecret === process.env.CRON_SECRET;
+  const isAuthorized = token === CRON_SECRET || isVercelCron;
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS || 
-      process.env.SMTP_USER === "your-gmail@gmail.com") {
+      process.env.SMTP_USER === "your-gmail@gmail.com" ||
+      process.env.SMTP_PASS === "your-gmail-app-password") {
     return NextResponse.json({ 
       warning: "SMTP not configured. Update SMTP_USER and SMTP_PASS in .env to enable emails.",
-      hint: "See /dashboard/profile to toggle email preferences." 
+      hint: "Go to Google Account > Security > App Passwords to generate a password, then set SMTP_PASS in .env" 
     }, { status: 200 });
   }
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  // Use UTC midnight as day boundary (server runs in UTC, consistent with task.ts)
+  const now = new Date();
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
   const usersToRemind = await prisma.user.findMany({
     where: {

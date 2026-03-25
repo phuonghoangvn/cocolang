@@ -43,6 +43,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
   const [isPending, startTransition] = useTransition();
   const [showCelebration, setShowCelebration] = useState(false);
   const [showTopic, setShowTopic] = useState(false);
+  const [newStreak, setNewStreak] = useState<number | undefined>(undefined);
   const router = useRouter();
 
   const isAllFinished = phaseIndex >= PHASES.length;
@@ -83,6 +84,7 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
     startTransition(async () => {
       const res = await completeTask(task.id, `4-3-2 Method Completed`);
       if (res.success) {
+        if (res.newStreak !== undefined) setNewStreak(res.newStreak);
         setShowCelebration(true);
       }
     });
@@ -95,10 +97,11 @@ export default function SpeakWorkspace({ task, isCompleted }: { task: any; isCom
       {showCelebration && (
         <TaskCompletionCelebration
           xpReward={task.xpReward}
+          newStreak={newStreak}
           onFinish={() => {
             setShowCelebration(false);
-            router.push("/dashboard");
             router.refresh();
+            router.push("/dashboard");
           }}
         />
       )}

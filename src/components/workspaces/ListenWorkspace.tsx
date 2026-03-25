@@ -10,6 +10,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
   const [textAnswer, setTextAnswer] = useState("");
   const [isPending, startTransition] = useTransition();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [newStreak, setNewStreak] = useState<number | undefined>(undefined);
   const [videoTitle, setVideoTitle] = useState<string | null>(null);
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
     startTransition(async () => {
       const res = await completeTask(task.id, `User Summary: ${textAnswer}`);
       if (res.success) {
+        if (res.newStreak !== undefined) setNewStreak(res.newStreak);
         setShowCelebration(true);
       }
     });
@@ -61,10 +63,11 @@ export default function ListenWorkspace({ task, isCompleted }: { task: any; isCo
       {showCelebration && (
         <TaskCompletionCelebration
           xpReward={task.xpReward}
+          newStreak={newStreak}
           onFinish={() => {
             setShowCelebration(false);
-            router.push("/dashboard");
             router.refresh();
+            router.push("/dashboard");
           }}
         />
       )}
